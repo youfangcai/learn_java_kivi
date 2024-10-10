@@ -65,6 +65,11 @@ learn git
 如：
 `git clone git@github.com:youfangcai/learn_java_kivi.git`
 
+### 10. 更新文件工作流程
+
+一般情况下，遵循 `git add` -> `git commit` -> `git pull` -> `git push` 的顺序是个好的实践，尤其是在团队协作时。这样可以确保你的提交是最新的，并且减少潜在的冲突。
+备注： 拉取和推送的顺序: 如果你的团队成员在你上次拉取之后对同一分支进行了更改，拉取操作将合并远程的更改到你的本地分支。这样可以确保你在推送之前解决任何潜在的冲突。
+
 ---
 ## part 4. 通过实际操作学习git
 
