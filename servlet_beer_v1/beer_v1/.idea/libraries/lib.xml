@@ -1,0 +1,13 @@
+<component name="libraryTable">
+  <library name="lib">
+    <CLASSES>
+      <root url="jar://$PROJECT_DIR$/lib/jakarta.servlet-api-6.0.0.jar!/" />
+      <root url="file://$PROJECT_DIR$/../../../java_ij/java_jars/get_json_jars" />
+      <root url="file://$PROJECT_DIR$/../../../java_ij/java_jars/ektorp_lightcouch_jars" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+    <jarDirectory url="file://$PROJECT_DIR$/../../../java_ij/java_jars/ektorp_lightcouch_jars" recursive="false" />
+    <jarDirectory url="file://$PROJECT_DIR$/../../../java_ij/java_jars/get_json_jars" recursive="false" />
+  </library>
+</component>

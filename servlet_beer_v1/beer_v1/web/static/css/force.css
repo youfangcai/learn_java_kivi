@@ -1,0 +1,31 @@
+svg{
+    background: rgb(80, 0, 80);
+    width: 100%;
+    height: 500px;
+}
+.node{
+
+}
+.link{
+
+}
+p{
+    color:rgb(255, 98, 0);
+    size: auto;
+}
+.highlight{
+    fill:rgb(80, 0, 0);
+}
+.fade{
+    fill: rgb(80, 90, 90);
+}
+.tooltip {
+    position: absolute;
+    text-align: center;
+    padding: 4px;
+    font: 12px sans-serif;
+    background: lightsteelblue;
+    border: 0px;
+    border-radius: 8px;
+    pointer-events: none;  /* 防止 tooltip 影响鼠标事件 */
+}

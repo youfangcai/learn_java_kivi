@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee
+                             https://jakarta.ee/xml/ns/jakartaee/web-app_5_0.xsd"
+         version="5.0">
+    
+    <servlet>
+        <servlet-name>Ch3 Beer</servlet-name>
+        <servlet-class>com.example.web.BeerSelect</servlet-class>
+    </servlet>
+    
+    <servlet-mapping>
+        <servlet-name>Ch3 Beer</servlet-name>
+        <url-pattern>/SelectBeer.do</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>Ch3 Cat</servlet-name>
+        <servlet-class>com.example.web.CatServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>Ch3 Cat</servlet-name>
+        <url-pattern>/catPhotos.do</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>Ch3 d3</servlet-name>
+        <servlet-class>com.example.web.SendD3JsonServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>Ch3 d3</servlet-name>
+        <url-pattern>/d3force.do</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>doog</servlet-name>
+        <servlet-class>com.example.web.ListenerTester</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>doog</servlet-name>
+        <url-pattern>dog.do</url-pattern>
+    </servlet-mapping>
+    
+    <context-param>
+        <param-name>breed</param-name>
+        <param-value>Great Dane</param-value>
+    </context-param>
+    
+    <context-param>
+        <param-name>jsonUrl</param-name>
+        <param-value>D:\java_apache-tomcat-10.1.28\apache-tomcat-10.1.28\webapps\Beer-v1\WEB-INF\couchdb.properties</param-value>
+    </context-param>
+    
+    <context-param>
+        <param-name>mysql</param-name>
+        <param-value>D:\java_apache-tomcat-10.1.28\apache-tomcat-10.1.28\webapps\Beer-v1\WEB-INF\mysql.properties</param-value>
+    </context-param>
+    
+    <listener>
+        <listener-class>com.example.listener.MyservletContextListener</listener-class>
+    </listener>
+    <listener>
+        <listener-class>com.example.listener.GetJsonConnectListener</listener-class>
+    </listener>
+</web-app>

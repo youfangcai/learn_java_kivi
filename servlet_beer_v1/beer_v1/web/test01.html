@@ -1,0 +1,146 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>PageX Example</title>-->
+<!--    <style>-->
+<!--        #myDiv {-->
+<!--            width: 300px;-->
+<!--            height: 300px;-->
+<!--            background-color: lightblue;-->
+<!--            position: relative;-->
+<!--            border: 1px solid #000;-->
+<!--        }-->
+<!--        #div01 {-->
+<!--            position: absolute;-->
+<!--            width: 50px;-->
+<!--            height: 50px;-->
+<!--            background-color: red;-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+
+<!--<div id="myDiv">Move your mouse here!</div>-->
+<!--<p id="output"></p>-->
+
+<!--<script>-->
+<!--    const myDiv = document.getElementById("myDiv");-->
+<!--    const output = document.getElementById("output");-->
+<!--    const div = document.createElement("div");-->
+<!--    div.setAttribute("id", "div01");-->
+<!--    myDiv.appendChild(div);-->
+
+<!--    myDiv.addEventListener("mousemove", function(event) {-->
+<!--        // 获取鼠标在页面上的位置-->
+<!--        const x = event.clientX;-->
+<!--        const y = event.clientY;-->
+
+<!--        output.textContent = `Mouse position: (${x}, ${y})`;-->
+
+<!--        // 更新div01的位置，使其跟随鼠标-->
+<!--        div.style.left = `${x - myDiv.offsetLeft}px`;  // 减去容器的偏移量-->
+<!--        div.style.top = `${y - myDiv.offsetTop}px`;-->
+<!--    });-->
+<!--</script>-->
+
+<!--</body>-->
+<!--</html>-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>D3 SVG offsetLeft Example</title>
+    <style>
+        #myDiv {
+            width: 500px;
+            height: 500px;
+            background-color: lightblue;
+            position: relative;
+            border: 1px solid #000;
+            margin: 20px auto;
+        }
+        #output {
+            text-align: center;
+            font-size: 18px;
+        }
+        .follower {
+            fill: red;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+<div id="myDiv">Move your mouse here!</div>
+<p id="output">Mouse position: (0, 0)</p>
+
+<!-- 引入 D3.js 库 -->
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<script>
+    // 定义 SVG 的宽度和高度
+    const width = 500;
+    const height = 500;
+
+    // 使用 D3 选择容器并添加 SVG
+    const svgSelection = d3.select("#myDiv")
+        .append("svg")
+        .attr("id", "svg")
+        .attr("class", "svg")
+        .attr("viewBox", [0, 0, width, height])
+        .style("width", "100%")
+        .style("height", "100%");
+
+    // 获取原生 DOM 元素
+    const svg = svgSelection.node();
+
+    // 添加一个圆形元素用于跟随鼠标
+    const follower = svgSelection.append("circle")
+        .attr("id", "div01")
+        .attr("r", 10)
+        .attr("class", "follower")
+        .attr("cx", -100)  // 初始位置在视口外
+        .attr("cy", -100);
+
+    // 添加鼠标移动事件监听器
+    svgSelection.on("mousemove", function(event) {
+        // 获取鼠标在 SVG 内的相对坐标
+        const [x, y] = d3.pointer(event);
+
+        // 更新输出文本
+        d3.select("#output").text(`Mouse position: (${Math.round(x)}, ${Math.round(y)})`);
+
+        // 更新圆形的位置，使其跟随鼠标
+        follower.attr("cx", x)
+            .attr("cy", y);
+    });
+
+    // 可选：隐藏圆形当鼠标离开 SVG
+    svgSelection.on("mouseleave", function() {
+        follower.attr("cx", -100)  // 将圆形移出可视区域
+            .attr("cy", -100);
+    });
+
+    // 可选：显示圆形当鼠标进入 SVG
+    svgSelection.on("mouseenter", function() {
+        // 圆形位置由 mousemove 事件控制
+    });
+
+    // 示例：访问 offsetLeft 和 offsetTop
+    // 在页面加载完成后获取 SVG 的偏移量
+    window.addEventListener("load", function() {
+        const svgOffsetLeft = svg.offsetLeft;
+        const svgOffsetTop = svg.offsetTop;
+        console.log(`SVG offsetLeft: ${svgOffsetLeft}, offsetTop: ${svgOffsetTop}`);
+
+        // 显示在页面上
+        d3.select("#output")
+            .append("div")
+            .text(`SVG offsetLeft: ${svgOffsetLeft}, offsetTop: ${svgOffsetTop}`);
+    });
+</script>
+
+</body>
+</html>
+
