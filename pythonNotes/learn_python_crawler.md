@@ -18,7 +18,7 @@ find(tag, attributes, recursive, text, keywords)
 - 递归参数 recursive 是一个布尔变量。
 - 文本参数 text 有点不同，它是用标签的文本内容去匹配，而不是用标签的属性。
 - 范围限制参数 limit，显然只用于 findAll 方法。find 其实等价于 findAll 的 limit 等于 1 时的情形。
-- 关键词参数 keyword，可以让你选择那些具有指定属性的标。
+- 关键词参数 keyword，可以让你选择那些具有指定属性的标签。
 ### 3. 其他BeautifulSoup对象
 
 - BeautifulSoup 对象
@@ -37,6 +37,14 @@ find(tag, attributes, recursive, text, keywords)
 - 一般情况下，BeautifulSoup 函数总是处理当前标签的后代标签。如：bsObj.div.findAll("img") 。
 + 处理子标签：children() 函数。
 + 处理后代标签：descendants() 函数。
+备注： .descendants 是一个针对单个 BeautifulSoup 对象的方法。也就是说先遍历 findAll 返回的每个元素，再对每个元素调用 .descendants。
+例如：
+```
+for tr in bsObject.find_all("tr", class_="gift"):
+    for child in tr.descendants:
+        print(child)
+```
+
 #### 2. 处理兄弟标签
 - BeautifulSoup 的 next_siblings() 函数可以让收集表格数据成为简单的事情，尤其是处理 带标题行的表格：
 ```
@@ -65,10 +73,23 @@ for sibling in bsObj.find("table",{"id":"giftList"}).tr.next_siblings: print(sib
 [A-Za-z0-9\._+]+@[A-Za-z]+\.(com|org|edu|net)
 ```
 - 正则表达式常用符号:
+
+<img src="C:\Users\Administrator\Pictures\Screenshots\屏幕截图 2024-10-09 201533.png" alt="屏幕截图 2024-10-09 201533" style="zoom:80%;" />
+
 #### 5. 正则表达式和BeautifulSoup
 
 BeautifulSoup 和正则表达式总是配合使用的。
 大多数支 持字符串参数的函数（比如，find(id="aTagIdHere")）都可以用正则表达式实现。
+例如：
+```
+images = bsObject.findAll("img,{"src":re.compile(r"\.\./img/gifts/img.*\.jpg")})
+for image in images: print(image["src"])
+```
+备注：
+>re.compile()函数：将正则表达式模式转换为一个内部表示形式，使得匹配操作更高效。
+>re.compile(pattern, flags=0)
+>pattern：要编译的正则表达式模式，可以是字符串或字节串。
+>flags：用于控制正则表达式匹配方式的标志（可选），如 re.IGNORECASE（忽略大小写）、re.MULTILINE（多行模式）等。
 
 #### 6. 获取属性
 
@@ -80,6 +101,7 @@ BeautifulSoup 和正则表达式总是配合使用的。
 - 要注意这行代码返回的是一个 Python 字典对象，可以获取和操作这些属性。比如要获取图 片的资源位置 src，可以用下面这行代码：
 	**myImgTag.attrs["src"]**
 #### 7. Lambda表达式
+
 Lambda 表达式本质上就是一个函数，可以作为其他函数的变量使用；也就是说，一个函 数不是定义成 f(x, y)，而是定义成 f(g(x), y)，或 f(g(x), h(x)) 的形式。<br>
 1. BeautifulSoup 允许我们把特定函数类型当作 findAll 函数的参数。
 2. 唯一的限制条件是这些 函数必须把一个标签作为参数且返回结果是布尔类型。
@@ -95,13 +117,55 @@ soup.findAll(lambda tag: len(tag.attrs) == 2)
 <div class="body" id="content"></div>
 <span style="color:red" class="title"></span>
 ```
-注： 是正 则表达式的完美替代方案。
+注： 是正则表达式的完美替代方案。
+
+由于 Lambda 函数可以是任意返回 True 或者 False 值的函数，你甚至可以结合使用 Lambda 函数与正则表达式，来查找匹配特定字符串模式的属性的标签。
+
 #### 8. 超越BeautifulSoup
+
 BeautifulSoup它并不 是你唯一的选择。
 你可以看看其他的库：
 1. lxml
 2. HTML parser
+
 ---
-## part 3. 开始采集
+
+## part 3. 编写网络爬虫
+
+### 3.1 遍历单个域名
+
+创建一个项目来实现“维基百科六度分隔理论”的查找方法。
+这段程序更像下面的形式。
+- 一个函数 getLinks，可以用维基百科词条 /wiki/< 词条名称 > 形式的URL链接作为参数， 然后以同样的形式返回一个列表，里面包含所有的词条 URL 链接。
+- 一个主函数，以某个起始词条为参数调用 getLinks，再从返回的 URL 列表里随机选择 一个词条链接，再调用 getLinks，直到我们主动停止，或者在新的页面上没有词条链接 了，程序才停止运行。
+
+```
+def getLinks(url):
+    html = urlopen("http://en.wikipedia.org" + url)
+    soup = BeautifulSoup(html, "html.parser")
+    # 提取页面链接
+    # 用到正则表达式的 ?! 与 ^$
+    return (soup.find("div", {"id":"bodyContent"})
+            .find_all("a", href = re.compile("^(/wiki/)((?!:).)*$")))
+
+url = "/wiki/Kevin_Bacon"
+links = getLinks(url)
+i = 0
+while len(links) > 0:
+    i+=1
+    newArticle = links[random.randint(0, len(links)-1)].attrs["href"]
+    print(newArticle)
+    links = getLinks(newArticle)
+    if i == 6:
+        break
+```
+备注：简单地构建一个从一个页面到另一个页面的爬虫。
+  但是要真正成 为自动化产品代码，还需要增加更多的异常处理。
+
+### 3.2 采集整个网站
+
+
+
 ---
+
 ## part 4. 使用api
