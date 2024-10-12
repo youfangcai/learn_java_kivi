@@ -70,6 +70,22 @@ learn git
 一般情况下，遵循 `git add` -> `git commit` -> `git pull` -> `git push` 的顺序是个好的实践，尤其是在团队协作时。这样可以确保你的提交是最新的，并且减少潜在的冲突。
 备注： 拉取和推送的顺序: 如果你的团队成员在你上次拉取之后对同一分支进行了更改，拉取操作将合并远程的更改到你的本地分支。这样可以确保你在推送之前解决任何潜在的冲突。
 
+### 11. 删除远程仓库的文件
+
+```
+# 删除文件;该命令会将文件从本地工作目录和暂存区中删除.
+# 如果您只想从 Git 的版本控制中删除文件，但保留工作目录中的文件，可以使用 --cached 选项;
+git rm example.txt
+git rm --cached example.txt
+
+# 提交更改;将更改提交到本地仓库.
+git commit -m "删除 example.txt 文件"
+
+# 推送到远程仓库;完成提交后，将更改推送到远程仓库以反映删除操作.
+git push origin branch_name 
+```
+备注：将 branch_name 替换为您所用的实际分支名称（如 main 或 master）。
+
 ---
 ## part 4. 通过实际操作学习git
 
@@ -138,6 +154,76 @@ git log --graph命令可以用图表形式输出提交日志，非常直观。
 
 `git log`命令只能查看以当前状态为终点的历史日志。所以这里要使用 `git reflog`命令，查看当前仓库的操作日志。在日志中找出 回溯历史之前的哈希值，通过`git reset --hard`命令恢复到回溯历 史前的状态。
 **注：执行 git reflog 命令，查看当前仓库执行过的操作的日志。可以利用 git reflog命令恢复到原先的状态，所以请各位读者务必牢记本部分。**
-#### 3. 消除冲突
+#### 3. 消除冲突,合并冲突
+
 不解决冲突就无法完成合并。
 查看冲突部分并将其解决。
+
+1. 查看冲突文件:
+`git status`
+2. 编辑冲突文件,自己解决
+3. 标记冲突已解决:
+`git add <冲突文件>`
+4. 完成合并:
+`git commit` 或 `git rebase --continue`
+
+#### 4. git commit --amend——修改提交信息
+
+要修改上一条提交信息，可以使用`git commit --amend`命令。
+用来更改提交信息、添加遗漏的文件，甚至调整提交内容。
+
+更改提交信息:
+`git commit --amend -m "新的提交信息"`
+
+添加遗漏的文件:
+```
+git add <遗漏的文件>
+git commit --amend --no-edit
+```
+备注：--no-edit 参数表示不修改提交信息，仅将暂存区的更改添加到最新的提交中。
+
+调整提交内容:
+1. 进行必要的更改（如修改文件、删除文件等）.
+2. `git add <文件>`
+3. `git commit --amend`
+删除文件:已经推送的提交:
+    1.1 `git rm obsolete.txt`
+    1.2`git commit -m "删除 obsolete.txt 文件"` 或 `git commit --amend --no-edit`
+    1.3`git push --force`
+
+#### 5. git rebase -i——压缩历史
+
+1. git commit -am
+自动将所有已跟踪的修改和删除的文件添加到暂存区，并使用提供的提交信息进行提交。
+如: `git commit -am "Fix typo"`
+
+2. git rebase命令
+
+对最近的两个提交进行详细的修改和整理。
+如：`git rebase -i HEAD~2`
+```
+pick abcdef1 第一个提交信息
+pick abcdef2 第二个提交信息
+```
+
+### 4.4 推送至远程仓库
+
+#### 1. git remote add——添加远程仓库
+
+在 GitHub 上创建的仓库路径为“git@github.com:用户名 / git-tutorial.git”。现在我们用git remote add命令将它设置 成本地仓库的远程仓库 A。
+`git remote add origin git@github.com:github-book/git-tutorial.git`
+
+#### 2. git push——推送至远程仓库
+
+将当前分支下本地仓库中的内容推送给远程仓库.
+`git push origin main`
+
+### 4.5 从远程仓库获取
+
+Git 中用于从远程仓库获取最新更改并将其合并到当前分支的命令。
+它帮助开发者保持本地仓库与远程仓库同步。
+实际上结合了两个操作：git fetch 和 git merge。
+git fetch：从远程仓库获取最新的提交和引用，但不会自动合并到当前分支。
+git merge：将指定分支的更改合并到当前分支。通常用于将 git fetch 获取的更改合并到本地分支。
+`git pull origin main` 或 `git pull --rebase`
+备注: `git pull --rebase` 使用变基而非合并，保持提交历史的线性。
