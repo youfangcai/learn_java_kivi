@@ -164,8 +164,136 @@ while len(links) > 0:
 
 ### 3.2 采集整个网站
 
+尤其是处理大型网站时，最合适的 工具就是用一个数据库来储存采集的资源。
+虽然这些网站采集并不费劲，但是它们需要爬虫有足够的深度（我们有 意收集数据的网站不多）。于是我就创建了一个爬虫递归地遍历每个网站，只收集那些 网站页面上的数据。<br><br>
+一个常用的费时的网站采集方法就是从顶级页面开始（比如主页），然后搜索页面上的所 有链接，形成列表。再去采集这些链接的每一个页面，然后把在每个页面上找到的链接形 成新的列表，重复执行下一轮采集。
 
+```
+pages = set()
+
+def getLinks(pageUrl):
+    global pages
+    try:
+        html = urlopen("http://en.wikipedia.org" + pageUrl)
+        # 在这里处理 html 内容，例如提取链接等
+    except HTTPError as e:
+        print(f"HTTP Error: {e.code} for URL: {pageUrl}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+    soup = BeautifulSoup(html, "html.parser")
+
+    try:
+        print(soup.h1.get_text())
+        print(soup.find(id = "mw-content-text").find_all("p")[0])
+        print(soup.find(id = "ca-edit").find("span").find("a").attrs["href"])
+    except AttributeError:
+        print("页面缺失一些属性!")
+
+    for link in soup.find_all("a", href = re.compile("^(/wiki/)")):
+        if "href" in link.attrs:
+            if link.attrs["href"] not in pages:
+                # 我们遇到了新页面
+                newPage = link.attrs["href"]
+                print("----------------\n"+newPage)
+                pages.add(newPage)
+                getLinks(newPage)
+
+getLinks("")
+```
+
+### 3.3 互联网采集
+
+互联网采集:(例子)收集内链和外链
+
+```
+import datetime
+import re
+import random
+from urllib.parse import urlparse
+from urllib.request import urlopen
+
+from bs4 import BeautifulSoup
+"""
+演示：收集内链与外链
+"""
+
+pages = set()
+# 设置随机种子, 一时间为种子
+random.seed(datetime.datetime.now().timestamp())
+
+# 获取页面中所有内链的列表
+def getInternalLinks(soup, includeUrl):
+    internalLinks = []
+    # 表示匹配以 / 开头的字符串 或 包含 includeUrl 的任何字符串
+    for link in soup.find_all("a", href=re.compile("^(/|.*" + includeUrl + ")")):
+        if link.attrs["href"] is not None:
+            if link.attrs["href"] not in internalLinks:
+                if link.attrs['href'].startswith('/'):
+                    internalLinks.append(includeUrl + link.attrs['href'])
+                else:
+                    internalLinks.append(link.attrs['href'])
+    return internalLinks
+
+# 获取页面中所有外链的列表
+def getExternalLinks(soup, excluderUrl):
+    externalLinks = []
+    for link in soup.find_all("a", href=re.compile("^([http|www])((?!" + excluderUrl + ").)*$")):
+        if link.attrs["href"] is not None:
+            if link.attrs["href"] not in externalLinks:
+                externalLinks.append(link.attrs["href"])
+    return externalLinks
+
+#
+def splitAddress(address):
+    addressParts = address.replace("http://", "").split("/")
+    return addressParts
+
+# 随机返回一个外链
+def getRandomExternalLink(startingPage):
+    html = urlopen(startingPage)
+    soup = BeautifulSoup(html, 'html.parser')
+    # 调用 urlparse(startingPage).netloc 可以从一个 URL 中提取网络位置部分（即域名和端口号）。
+    externalLinks = getExternalLinks(soup, urlparse(startingPage).netloc)
+    print(externalLinks)
+    if len(externalLinks) == 0:
+        print('No external links, looking around the site for one')
+        # urlparse(startingPage).scheme 用于提取给定 URL 的协议部分（scheme），例如 http、https、ftp 等。
+        domain = '{}://{}'.format(urlparse(startingPage).scheme, urlparse(startingPage).netloc)
+        internalLinks = getInternalLinks(soup, domain)
+        return getRandomExternalLink(internalLinks[random.randint(0, len(internalLinks)-1)])
+    else:
+        return externalLinks[random.randint(0, len(externalLinks)-1)]
+
+#
+def followExternalOnly(startingSite):
+    externalLink = getRandomExternalLink(startingSite)
+    print('Random external link is: {}'.format(externalLink))
+    followExternalOnly(externalLink)
+
+# followExternalOnly('http://oreilly.com')
+
+# 收集内链和外链
+allExtLinks = set()
+allIntLinks = set()
+# 收集该页面的外链和内链
+def getAllExternalLinks(siteUrl):
+    html = urlopen(siteUrl)
+    soup = BeautifulSoup(html, 'html.parser')
+    externalLinks = getExternalLinks(soup, urlparse(siteUrl).netloc)
+    internalLinks = getInternalLinks(soup, urlparse(siteUrl).netloc)
+    for link in externalLinks:
+        if link not in allExtLinks:
+            allExtLinks.add(link)
+            print(link)
+    print("\n------------------------\n")
+    for link in internalLinks:
+        if link not in allIntLinks:
+            allIntLinks.add(link)
+            print(link)
+getAllExternalLinks("https://www.topgoer.com/")
+```
 
 ---
 
-## part 4. 使用api
+## part 4. 网络爬虫模型
